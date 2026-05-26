@@ -1,0 +1,315 @@
+/* =============================================================================
+   Global reset and base
+   ============================================================================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #1a1a2e;
+    background-image: url('../cat2.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    color: #f0f0f0;
+    min-height: 100vh;
+    padding: 24px 16px;
+}
+
+/* Semi-transparent overlay so the cat image doesn't overpower the content */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.72);
+    z-index: 0;
+}
+
+/* Every direct child of body sits above the overlay */
+body > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
+   Page layout
+   ============================================================================= */
+
+.page {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    letter-spacing: 0.06em;
+    color: #e8d5ff;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    color: #b0a0cc;
+    margin-top: 4px;
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+.instructions ul {
+    list-style: none;
+    margin-top: 8px;
+}
+
+.instructions li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+/* Small inline preview squares shown in the instructions */
+.cell-demo {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border: 1px solid #888;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.cell-demo--white { background: #ffffff; }
+.cell-demo--clue  { background: #555577; }
+.cell-demo--black { background: #1a1a1a; }
+
+/* =============================================================================
+   Grid
+   ============================================================================= */
+
+.grid-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.kakuro-grid {
+    border-collapse: collapse;
+    background: #222233;
+    border: 2px solid #6644aa;
+    border-radius: 4px;
+}
+
+/* =============================================================================
+   Cells
+   ============================================================================= */
+
+.cell {
+    width: 56px;
+    height: 56px;
+    border: 1px solid #44446a;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.4rem;
+    font-weight: bold;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s;
+}
+
+/* White cell — to be filled with a digit */
+.cell--white {
+    background: #f8f8ff;
+    color: #1a1a2e;
+}
+
+.cell--white:hover {
+    background: #e8e8ff;
+}
+
+/* Solved white cell — shows the answer digit */
+.cell--solved {
+    background: #eaf7ea;
+    color: #1a3a1a;
+}
+
+/* Clue cell — dark background with diagonal divider */
+.cell--clue {
+    background: #383858;
+    cursor: pointer;
+}
+
+.cell--clue::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom right,
+        transparent calc(50% - 1px),
+        #8888aa calc(50% - 1px),
+        #8888aa calc(50% + 1px),
+        transparent calc(50% + 1px)
+    );
+    pointer-events: none;
+}
+
+/* Black cell */
+.cell--black {
+    background: #111122;
+    cursor: pointer;
+}
+
+/* =============================================================================
+   Clue cell inputs (Step 2) and display values (Step 3)
+   ============================================================================= */
+
+.clue-cell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Shared styles for both input and display variants */
+.clue-input,
+.clue-value {
+    position: absolute;
+    font-size: 0.72rem;
+    font-weight: bold;
+    color: #ddd;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 24px;
+    text-align: center;
+    line-height: 1;
+    pointer-events: auto;
+}
+
+/* Across: top-right quadrant */
+.clue-input--across,
+.clue-value--across {
+    top: 4px;
+    right: 4px;
+}
+
+/* Down: bottom-left quadrant */
+.clue-input--down,
+.clue-value--down {
+    bottom: 4px;
+    left: 4px;
+}
+
+.clue-input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+    padding: 0;
+}
+
+.clue-input[type='number']::-webkit-inner-spin-button,
+.clue-input[type='number']::-webkit-outer-spin-button {
+    display: none;
+}
+
+.clue-input:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+/* =============================================================================
+   Buttons
+   ============================================================================= */
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.btn {
+    padding: 10px 28px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn--primary {
+    background: #7744cc;
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background: #8855ee;
+}
+
+.btn--secondary {
+    background: #444466;
+    color: #ddddff;
+}
+
+.btn--secondary:hover {
+    background: #555588;
+}
+
+/* =============================================================================
+   Spinner (Step 3 while solving)
+   ============================================================================= */
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px 0;
+    color: #b0a0cc;
+}
+
+.spinner__ring {
+    width: 48px;
+    height: 48px;
+    border: 5px solid rgba(119, 68, 204, 0.25);
+    border-top-color: #7744cc;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   Error box (Step 3 on unsolvable/error)
+   ============================================================================= */
+
+.error-box {
+    background: rgba(180, 50, 50, 0.25);
+    border: 1px solid #cc4444;
+    border-radius: 8px;
+    padding: 16px 20px;
+    color: #ffaaaa;
+    text-align: center;
+    margin: 20px 0;
+    font-size: 0.95rem;
+}
