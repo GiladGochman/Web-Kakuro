@@ -56,6 +56,10 @@ class Solver
             $snapshot = $board->snapshot();
             $snapshot->assign($row, $col, $digit);
 
+            if (!$this->removeDigitFromPeers($snapshot, $row, $col, $digit)) {
+                continue; // Immediate contradiction — try next digit.
+            }
+
             $result = $this->solveBoard($snapshot);
             if ($result !== null) {
                 return $result;
@@ -147,6 +151,11 @@ class Solver
                 if (count($possibleCells) === 1) {
                     [$row, $col] = $possibleCells[0];
                     if ($board->getAssigned($row, $col) !== null) continue;
+
+                    // With unordered combos, only force the assignment if every
+                    // remaining combo requires this digit — otherwise the run may
+                    // simply not use it at all.
+                    if (!$this->runRequiresDigit($run, $digit)) continue;
 
                     $board->assign($row, $col, $digit);
                     $changed = true;
@@ -252,31 +261,30 @@ class Solver
     private function applyCombinationElimination(Board $board, bool &$changed): bool
     {
         foreach ($board->getRuns() as $run) {
-            // Step A: prune combinations that conflict with current candidates.
-            foreach ($run->getCells() as $position => $coord) {
+            // Step A: collect each cell's effective candidates (assigned = single value).
+            $cellCandidates = [];
+            foreach ($run->getCells() as $pos => $coord) {
                 ['row' => $r, 'col' => $c] = $coord;
-                $allowed = $board->getCandidates($r, $c);
-
-                if (!empty($allowed)) {
-                    $run->restrictPositionToCandidates($position, $allowed);
-                }
+                $assigned = $board->getAssigned($r, $c);
+                $cellCandidates[$pos] = $assigned !== null ? [$assigned] : $board->getCandidates($r, $c);
             }
+
+            // Step B: prune combos that can't fill any cell.
+            $run->pruneByAllCellCandidates($cellCandidates);
 
             if ($run->hasNoCombinations()) {
-                return false; // No valid combination left for this run.
+                return false;
             }
 
-            // Step B: remove candidates no longer present in any remaining combo.
-            $unionByPosition = $this->computeUnionByPosition($run);
-
-            foreach ($run->getCells() as $position => $coord) {
+            // Step C: remove candidates not supported by any remaining combo.
+            foreach ($run->getCells() as $pos => $coord) {
                 ['row' => $r, 'col' => $c] = $coord;
                 if ($board->getAssigned($r, $c) !== null) continue;
 
-                $supportedDigits = $unionByPosition[$position] ?? [];
+                $supported = $run->getSupportedDigitsForCell($cellCandidates[$pos]);
 
                 foreach ($board->getCandidates($r, $c) as $digit) {
-                    if (!in_array($digit, $supportedDigits, true)) {
+                    if (!in_array($digit, $supported, true)) {
                         $board->removeCandidate($r, $c, $digit);
                         $changed = true;
                     }
@@ -289,23 +297,6 @@ class Solver
         }
 
         return true;
-    }
-
-    /**
-     * For each position in a run, returns the set of digits that appear at
-     * that position across all remaining valid combinations.
-     *
-     * @return array<int, list<int>>  position => [digit, ...]
-     */
-    private function computeUnionByPosition(Run $run): array
-    {
-        $union = [];
-        foreach ($run->getCombinations() as $combo) {
-            foreach ($combo as $pos => $digit) {
-                $union[$pos][$digit] = true;
-            }
-        }
-        return array_map('array_keys', $union);
     }
 
     // -------------------------------------------------------------------------

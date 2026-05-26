@@ -157,7 +157,7 @@ body > * {
     position: absolute;
     inset: 0;
     background: linear-gradient(
-        to bottom right,
+        to bottom left,
         transparent calc(50% - 1px),
         #8888aa calc(50% - 1px),
         #8888aa calc(50% + 1px),

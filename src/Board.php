@@ -120,7 +120,7 @@ class Board
                     continue;
                 }
                 $sum = $clues[$r][$c]['right'] ?? null;
-                if ($sum === null) {
+                if ($sum === null || $sum === 0) {
                     continue;
                 }
 
@@ -144,7 +144,7 @@ class Board
                     continue;
                 }
                 $sum = $clues[$r][$c]['down'] ?? null;
-                if ($sum === null) {
+                if ($sum === null || $sum === 0) {
                     continue;
                 }
 

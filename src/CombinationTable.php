@@ -47,7 +47,6 @@ class CombinationTable
             $this->table[$sum][$length][] = $current;
         }
 
-        // Prune: can't add more than 9 digits, and the digit must be ≤ 9.
         if ($length === 9 || $min > 9) {
             return;
         }

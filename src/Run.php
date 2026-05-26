@@ -53,45 +53,51 @@ class Run
     }
 
     /**
-     * Removes any combination that does NOT contain $digit at position $position.
-     * Used when a cell is assigned a value and that value must appear there.
+     * Removes combos that cannot fill the run given each cell's current candidates.
+     * A combo is invalid if any cell has no digit from the combo in its candidates.
+     * $cellCandidates is indexed by position (same order as $this->cells).
      */
-    public function keepOnlyCombosWithDigitAtPosition(int $digit, int $position): void
+    public function pruneByAllCellCandidates(array $cellCandidates): void
     {
         $this->combinations = array_values(array_filter(
             $this->combinations,
-            fn(array $combo) => ($combo[$position] ?? null) === $digit
+            function (array $combo) use ($cellCandidates): bool {
+                foreach ($cellCandidates as $candidates) {
+                    if (empty(array_intersect($combo, $candidates))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
         ));
     }
 
     /**
-     * Removes any combination that contains $digit at position $position.
-     * Used when a digit is eliminated from a specific cell in this run.
+     * Returns the digits that are supported at a given cell: digits that appear in
+     * any remaining combo AND are in that cell's own candidates.
      */
-    public function removeCombosWithDigitAtPosition(int $digit, int $position): void
+    public function getSupportedDigitsForCell(array $cellCandidates): array
     {
-        $this->combinations = array_values(array_filter(
-            $this->combinations,
-            fn(array $combo) => ($combo[$position] ?? null) !== $digit
-        ));
-    }
-
-    /**
-     * Removes any combination that places a digit NOT in $allowedDigits at $position.
-     * Used to synchronise combinations with a cell's current candidate set.
-     */
-    public function restrictPositionToCandidates(int $position, array $allowedDigits): void
-    {
-        $allowed = array_flip($allowedDigits);
-        $this->combinations = array_values(array_filter(
-            $this->combinations,
-            fn(array $combo) => isset($allowed[$combo[$position] ?? -1])
-        ));
+        $supported = [];
+        $candidateSet = array_flip($cellCandidates);
+        foreach ($this->combinations as $combo) {
+            foreach ($combo as $digit) {
+                if (isset($candidateSet[$digit])) {
+                    $supported[$digit] = true;
+                }
+            }
+        }
+        return array_keys($supported);
     }
 
     public function hasNoCombinations(): bool
     {
         return empty($this->combinations);
+    }
+
+    public function getCells(): array
+    {
+        return $this->cells;
     }
 
     public function getCellCount(): int
