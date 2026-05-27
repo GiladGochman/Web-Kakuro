@@ -49,11 +49,11 @@ class Solver
     // Helpers
     // -------------------------------------------------------------------------
 
-    /** Assigns a cell and fires the callback if set. */
+    /** Assigns a cell and fires the callback if set and if on main board. */
     private function assignCell(Board $board, int $row, int $col, int $digit): void
     {
         $board->assign($row, $col, $digit);
-        if ($this->onAssign) {
+        if ($this->onAssign && $board === $this->board) {
             ($this->onAssign)($row, $col, $digit);
         }
     }

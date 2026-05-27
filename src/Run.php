@@ -54,7 +54,8 @@ class Run
 
     /**
      * Removes combos that cannot fill the run given each cell's current candidates.
-     * A combo is invalid if any cell has no digit from the combo in its candidates.
+     * A combo is valid if there exists a bijection between combo digits and cells
+     * such that each cell's assigned digit is in its candidates.
      * $cellCandidates is indexed by position (same order as $this->cells).
      */
     public function pruneByAllCellCandidates(array $cellCandidates): void
@@ -62,14 +63,51 @@ class Run
         $this->combinations = array_values(array_filter(
             $this->combinations,
             function (array $combo) use ($cellCandidates): bool {
-                foreach ($cellCandidates as $candidates) {
-                    if (empty(array_intersect($combo, $candidates))) {
-                        return false;
-                    }
-                }
-                return true;
+                // Check if combo digits can be assigned to cells in some order
+                return $this->canAssignCombo($combo, $cellCandidates);
             }
         ));
+    }
+
+    /**
+     * Check if combo digits can be assigned to cells in some permutation.
+     * This handles the fact that combos are unordered sets.
+     */
+    private function canAssignCombo(array $combo, array $cellCandidates): bool
+    {
+        $numCells = count($cellCandidates);
+        if (count($combo) !== $numCells) {
+            return false;
+        }
+
+        // Try all permutations of the combo to see if any matches the cell candidates
+        return $this->tryAssignPermutation($combo, $cellCandidates, 0, array_flip(range(0, $numCells - 1)));
+    }
+
+    /**
+     * Recursively try to assign combo digits to cells.
+     * $usedPositions tracks which cell positions have been assigned.
+     */
+    private function tryAssignPermutation(array $combo, array $cellCandidates, int $comboIdx, array $usedPositions): bool
+    {
+        if ($comboIdx === count($combo)) {
+            return empty($usedPositions);
+        }
+
+        $digit = $combo[$comboIdx];
+
+        // Try assigning this digit to any unassigned cell that can accept it
+        foreach ($usedPositions as $pos => $_) {
+            if (in_array($digit, $cellCandidates[$pos], true)) {
+                unset($usedPositions[$pos]);
+                if ($this->tryAssignPermutation($combo, $cellCandidates, $comboIdx + 1, $usedPositions)) {
+                    return true;
+                }
+                $usedPositions[$pos] = true;
+            }
+        }
+
+        return false;
     }
 
     /**

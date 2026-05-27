@@ -108,14 +108,16 @@ function processStreamEvent(line) {
     if (eventType === "assign") {
       updateCell(data.row, data.col, data.digit);
     } else if (eventType === "solved") {
+      if (solutionReceived) return;
       solutionReceived = true;
+
       if (data.status === "unsolvable") {
         showError("No solution exists for this puzzle.");
       } else if (data.status === "solved") {
         if (data.solution) {
           fillRemainingCells(data.solution);
         }
-        showSuccess("Puzzle solved! ✓");
+        showSuccess("✓ Puzzle solved successfully!");
       } else {
         showError(data.message || "An error occurred.");
       }
@@ -160,7 +162,6 @@ function renderGridSkeleton(puzzle) {
         td.appendChild(buildClueDisplay(def.clueRight, def.clueDown));
       } else if (def.type === "white") {
         td.textContent = "";
-        td.classList.add("cell--solved");
       }
 
       tr.appendChild(td);
@@ -177,14 +178,17 @@ function renderGridSkeleton(puzzle) {
 function updateCell(row, col, digit) {
   const cell = document.getElementById(`cell-${row}-${col}`);
   if (cell) {
+    const wasEmpty = !cell.textContent;
     cell.textContent = digit;
     // Add a brief pulse animation
     cell.classList.remove("cell--assigned");
     void cell.offsetWidth; // Trigger reflow to restart animation
     cell.classList.add("cell--assigned");
 
-    whiteBlocksRemaining--;
-    updateWhiteBlockCounter();
+    if (wasEmpty) {
+      whiteBlocksRemaining--;
+      updateWhiteBlockCounter();
+    }
 
     if (whiteBlocksRemaining === 0 && !solutionReceived) {
       checkVictoryCondition();
@@ -251,7 +255,8 @@ function checkVictoryCondition() {
     }
   }
 
-  showSuccess("✓ Puzzle solved successfully!");
+  whiteBlocksRemaining = 0;
+  updateWhiteBlockCounter();
 }
 
 function validateClueRun(startRow, startCol, direction, expectedSum) {
@@ -298,10 +303,12 @@ function fillRemainingCells(solutionGrid) {
         if (cell && !cell.textContent) {
           cell.textContent = digit;
           cell.classList.add("cell--assigned");
+          whiteBlocksRemaining--;
         }
       }
     }
   }
+  updateWhiteBlockCounter();
 }
 
 // ============================================================================
