@@ -37,6 +37,12 @@
         location.reload();
     }
 
+    function loadDebugPuzzle2() {
+        const puzzle = buildDebugPuzzle2();
+        sessionStorage.setItem('kakuro_puzzle', JSON.stringify(puzzle));
+        location.reload();
+    }
+
     function buildDebugPuzzle() {
         return {
             rows: 8,
@@ -109,10 +115,103 @@
             ]
         };
     }
+
+    function buildDebugPuzzle2() {
+        return {
+            rows: 9,
+            cols: 9,
+            cells: [
+                { row: 0, col: 0, type: "black" },
+                { row: 0, col: 1, type: "clue", clueRight: null, clueDown: 6 },
+                { row: 0, col: 2, type: "clue", clueRight: null, clueDown: 7 },
+                { row: 0, col: 3, type: "black" },
+                { row: 0, col: 4, type: "black" },
+                { row: 0, col: 5, type: "black" },
+                { row: 0, col: 6, type: "black" },
+                { row: 0, col: 7, type: "black" },
+                { row: 0, col: 8, type: "black" },
+                { row: 1, col: 0, type: "clue", clueRight: 5, clueDown: null },
+                { row: 1, col: 1, type: "white" },
+                { row: 1, col: 2, type: "white" },
+                { row: 1, col: 3, type: "black" },
+                { row: 1, col: 4, type: "black" },
+                { row: 1, col: 5, type: "black" },
+                { row: 1, col: 6, type: "black" },
+                { row: 1, col: 7, type: "black" },
+                { row: 1, col: 8, type: "black" },
+                { row: 2, col: 0, type: "clue", clueRight: 8, clueDown: null },
+                { row: 2, col: 1, type: "white" },
+                { row: 2, col: 2, type: "white" },
+                { row: 2, col: 3, type: "black" },
+                { row: 2, col: 4, type: "black" },
+                { row: 2, col: 5, type: "black" },
+                { row: 2, col: 6, type: "black" },
+                { row: 2, col: 7, type: "black" },
+                { row: 2, col: 8, type: "black" },
+                { row: 3, col: 0, type: "black" },
+                { row: 3, col: 1, type: "black" },
+                { row: 3, col: 2, type: "black" },
+                { row: 3, col: 3, type: "black" },
+                { row: 3, col: 4, type: "black" },
+                { row: 3, col: 5, type: "black" },
+                { row: 3, col: 6, type: "black" },
+                { row: 3, col: 7, type: "black" },
+                { row: 3, col: 8, type: "black" },
+                { row: 4, col: 0, type: "black" },
+                { row: 4, col: 1, type: "black" },
+                { row: 4, col: 2, type: "black" },
+                { row: 4, col: 3, type: "black" },
+                { row: 4, col: 4, type: "black" },
+                { row: 4, col: 5, type: "black" },
+                { row: 4, col: 6, type: "black" },
+                { row: 4, col: 7, type: "black" },
+                { row: 4, col: 8, type: "black" },
+                { row: 5, col: 0, type: "black" },
+                { row: 5, col: 1, type: "black" },
+                { row: 5, col: 2, type: "black" },
+                { row: 5, col: 3, type: "black" },
+                { row: 5, col: 4, type: "black" },
+                { row: 5, col: 5, type: "black" },
+                { row: 5, col: 6, type: "black" },
+                { row: 5, col: 7, type: "black" },
+                { row: 5, col: 8, type: "black" },
+                { row: 6, col: 0, type: "black" },
+                { row: 6, col: 1, type: "black" },
+                { row: 6, col: 2, type: "black" },
+                { row: 6, col: 3, type: "black" },
+                { row: 6, col: 4, type: "black" },
+                { row: 6, col: 5, type: "black" },
+                { row: 6, col: 6, type: "black" },
+                { row: 6, col: 7, type: "black" },
+                { row: 6, col: 8, type: "black" },
+                { row: 7, col: 0, type: "black" },
+                { row: 7, col: 1, type: "black" },
+                { row: 7, col: 2, type: "black" },
+                { row: 7, col: 3, type: "black" },
+                { row: 7, col: 4, type: "black" },
+                { row: 7, col: 5, type: "black" },
+                { row: 7, col: 6, type: "black" },
+                { row: 7, col: 7, type: "black" },
+                { row: 7, col: 8, type: "black" },
+                { row: 8, col: 0, type: "black" },
+                { row: 8, col: 1, type: "black" },
+                { row: 8, col: 2, type: "black" },
+                { row: 8, col: 3, type: "black" },
+                { row: 8, col: 4, type: "black" },
+                { row: 8, col: 5, type: "black" },
+                { row: 8, col: 6, type: "black" },
+                { row: 8, col: 7, type: "black" },
+                { row: 8, col: 8, type: "black" }
+            ]
+        };
+    }
     </script>
-    <div style="position:fixed;bottom:12px;right:12px">
+    <div style="position:fixed;bottom:12px;right:12px;display:flex;gap:8px;flex-direction:column;align-items:flex-end">
         <button onclick="loadDebugPuzzle()" style="background:#c84;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem">
-            Debug: load 8×8 puzzle
+            Debug: Puzzle 1
+        </button>
+        <button onclick="loadDebugPuzzle2()" style="background:#884;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem">
+            Debug: Puzzle 2
         </button>
     </div>
 </body>
