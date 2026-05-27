@@ -83,6 +83,9 @@ Web-Kakuro/
 
   css/
     style.css         # All styles
+
+  tests/
+    test-*.php        # Manual/debug solver test scripts
 ```
 
 ---
@@ -157,4 +160,17 @@ If propagation stalls and the board is incomplete, the solver picks the unassign
 ```json
 { "status": "unsolvable", "message": "No solution exists for this puzzle." }
 { "status": "error",      "message": "Impossible clue: sum 50 for 3 cells at (0,1) going horizontal." }
+```
+
+---
+
+## Running Test Scripts
+
+Solver test/debug scripts are stored in `tests/`.
+
+Run any script from the project root, for example:
+
+```bash
+php tests/test-assign.php
+php tests/test-propagate.php
 ```

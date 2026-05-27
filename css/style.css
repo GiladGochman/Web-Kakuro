@@ -36,6 +36,11 @@ body > * {
   z-index: 1;
 }
 
+/* Make the HTML hidden attribute reliably win against class display rules */
+[hidden] {
+  display: none !important;
+}
+
 /* =============================================================================
    Page layout
    ============================================================================= */

@@ -15,6 +15,13 @@ let whiteBlocksRemaining = 0;
 let totalWhiteBlocks = 0;
 let solutionReceived = false;
 
+function hideSpinnerAndShowActions() {
+  spinner.hidden = true;
+  spinner.style.display = "none";
+  actionsEl.hidden = false;
+  actionsEl.style.display = "flex";
+}
+
 const puzzle = loadPuzzle();
 if (!puzzle) {
   // Auto-load debug puzzle as default
@@ -85,10 +92,9 @@ async function solvePuzzle(puzzle) {
       if (done) break;
     }
 
-    spinner.hidden = true;
-    actionsEl.hidden = false;
+    hideSpinnerAndShowActions();
   } catch (err) {
-    spinner.hidden = true;
+    hideSpinnerAndShowActions();
     showError("Could not reach the server: " + err.message);
   }
 }
@@ -110,6 +116,7 @@ function processStreamEvent(line) {
     } else if (eventType === "solved") {
       if (solutionReceived) return;
       solutionReceived = true;
+      hideSpinnerAndShowActions();
 
       if (data.status === "unsolvable") {
         showError("No solution exists for this puzzle.");
@@ -122,6 +129,7 @@ function processStreamEvent(line) {
         showError(data.message || "An error occurred.");
       }
     } else if (eventType === "error") {
+      hideSpinnerAndShowActions();
       showError(data.message || "An error occurred.");
     }
   }
