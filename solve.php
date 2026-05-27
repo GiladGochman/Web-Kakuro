@@ -73,5 +73,7 @@ function sendEvent(string $event, array $data): void
     echo "event: $event\n";
     echo 'data: ' . json_encode($data) . "\n\n";
     flush();
-    ob_flush();
+    if (ob_get_level() > 0) {
+        ob_flush();
+    }
 }

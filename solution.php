@@ -31,9 +31,6 @@
 
     <script src="js/solution.js"></script>
     <script>
-    // DEBUG: loads a simple known-solvable 8×8 puzzle and reloads.
-    // The puzzle uses a 4×4 white block in the top-left corner and black
-    // filler cells everywhere else so the rendered board is a full 8×8 grid.
     function loadDebugPuzzle() {
         const puzzle = buildDebugPuzzle();
         sessionStorage.setItem('kakuro_puzzle', JSON.stringify(puzzle));
@@ -41,51 +38,76 @@
     }
 
     function buildDebugPuzzle() {
-        const rows = 8;
-        const cols = 8;
-        const layout = [
-            ['black', 'clue', 'clue', 'black', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'clue', 'clue', 'clue', 'clue', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-        ];
-
-            '0,1': { clueRight: null, clueDown: 10 },
-            '0,2': { clueRight: null, clueDown: 10 },
-            '0,3': { clueRight: null, clueDown: 10 },
-            '0,4': { clueRight: null, clueDown: 10 },
-            '1,0': { clueRight: 10, clueDown: null },
-            '2,0': { clueRight: 10, clueDown: null },
-            '3,0': { clueRight: 10, clueDown: null },
-            '4,0': { clueRight: 10, clueDown: null },
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-
-        const cells = [];
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const type = layout[row][col];
-
-                if (type === 'clue') {
-            '0,1': { clueRight: null, clueDown: 6 },
-            '0,2': { clueRight: null, clueDown: 6 },
-            '0,3': { clueRight: null, clueDown: 6 },
-            '1,0': { clueRight: 6, clueDown: null },
-            '2,0': { clueRight: 6, clueDown: null },
-            '3,0': { clueRight: 6, clueDown: null },
-            }
-        }
-
-        return { rows, cols, cells };
+        return {
+            rows: 8,
+            cols: 8,
+            cells: [
+                { row: 0, col: 0, type: "black" },
+                { row: 0, col: 1, type: "clue", clueRight: null, clueDown: 6 },
+                { row: 0, col: 2, type: "clue", clueRight: null, clueDown: 7 },
+                { row: 0, col: 3, type: "clue", clueRight: null, clueDown: 9 },
+                { row: 0, col: 4, type: "black" },
+                { row: 0, col: 5, type: "black" },
+                { row: 0, col: 6, type: "black" },
+                { row: 0, col: 7, type: "black" },
+                { row: 1, col: 0, type: "clue", clueRight: 6, clueDown: null },
+                { row: 1, col: 1, type: "white" },
+                { row: 1, col: 2, type: "white" },
+                { row: 1, col: 3, type: "white" },
+                { row: 1, col: 4, type: "black" },
+                { row: 1, col: 5, type: "black" },
+                { row: 1, col: 6, type: "black" },
+                { row: 1, col: 7, type: "black" },
+                { row: 2, col: 0, type: "clue", clueRight: 7, clueDown: null },
+                { row: 2, col: 1, type: "white" },
+                { row: 2, col: 2, type: "white" },
+                { row: 2, col: 3, type: "white" },
+                { row: 2, col: 4, type: "black" },
+                { row: 2, col: 5, type: "black" },
+                { row: 2, col: 6, type: "black" },
+                { row: 2, col: 7, type: "black" },
+                { row: 3, col: 0, type: "clue", clueRight: 9, clueDown: null },
+                { row: 3, col: 1, type: "white" },
+                { row: 3, col: 2, type: "white" },
+                { row: 3, col: 3, type: "white" },
+                { row: 3, col: 4, type: "black" },
+                { row: 3, col: 5, type: "black" },
+                { row: 3, col: 6, type: "black" },
+                { row: 3, col: 7, type: "black" },
+                { row: 4, col: 0, type: "black" },
+                { row: 4, col: 1, type: "black" },
+                { row: 4, col: 2, type: "black" },
+                { row: 4, col: 3, type: "black" },
+                { row: 4, col: 4, type: "black" },
+                { row: 4, col: 5, type: "black" },
+                { row: 4, col: 6, type: "black" },
+                { row: 4, col: 7, type: "black" },
+                { row: 5, col: 0, type: "black" },
+                { row: 5, col: 1, type: "black" },
+                { row: 5, col: 2, type: "black" },
+                { row: 5, col: 3, type: "black" },
+                { row: 5, col: 4, type: "black" },
+                { row: 5, col: 5, type: "black" },
+                { row: 5, col: 6, type: "black" },
+                { row: 5, col: 7, type: "black" },
+                { row: 6, col: 0, type: "black" },
+                { row: 6, col: 1, type: "black" },
+                { row: 6, col: 2, type: "black" },
+                { row: 6, col: 3, type: "black" },
+                { row: 6, col: 4, type: "black" },
+                { row: 6, col: 5, type: "black" },
+                { row: 6, col: 6, type: "black" },
+                { row: 6, col: 7, type: "black" },
+                { row: 7, col: 0, type: "black" },
+                { row: 7, col: 1, type: "black" },
+                { row: 7, col: 2, type: "black" },
+                { row: 7, col: 3, type: "black" },
+                { row: 7, col: 4, type: "black" },
+                { row: 7, col: 5, type: "black" },
+                { row: 7, col: 6, type: "black" },
+                { row: 7, col: 7, type: "black" }
+            ]
+        };
     }
     </script>
     <div style="position:fixed;bottom:12px;right:12px">

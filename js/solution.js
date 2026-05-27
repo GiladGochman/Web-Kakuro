@@ -13,7 +13,10 @@ const statusArea = document.getElementById("status-area");
 
 const puzzle = loadPuzzle();
 if (!puzzle) {
-  window.location.href = "index.php";
+  // Auto-load debug puzzle as default
+  const debugPuzzle = buildDebugPuzzle();
+  sessionStorage.setItem("kakuro_puzzle", JSON.stringify(debugPuzzle));
+  location.reload();
 }
 
 // Render the grid skeleton immediately (empty white cells, clue cells, black cells)
@@ -102,7 +105,9 @@ function processStreamEvent(line) {
     } else if (eventType === "solved") {
       if (data.status === "unsolvable") {
         showError("No solution exists for this puzzle.");
-      } else if (data.status !== "solved") {
+      } else if (data.status === "solved") {
+        showSuccess("Puzzle solved! ✓");
+      } else {
         showError(data.message || "An error occurred.");
       }
     } else if (eventType === "error") {
@@ -198,6 +203,13 @@ function showError(message) {
   statusArea.appendChild(errorBox);
 }
 
+function showSuccess(message) {
+  const successBox = document.createElement("div");
+  successBox.className = "success-box";
+  successBox.textContent = message;
+  statusArea.appendChild(successBox);
+}
+
 // ============================================================================
 // Session helper
 // ============================================================================
@@ -211,4 +223,77 @@ function loadPuzzle() {
   } catch {
     return null;
   }
+}
+
+function buildDebugPuzzle() {
+  return {
+    rows: 8,
+    cols: 8,
+    cells: [
+      { row: 0, col: 0, type: "black" },
+      { row: 0, col: 1, type: "clue", clueRight: null, clueDown: 6 },
+      { row: 0, col: 2, type: "clue", clueRight: null, clueDown: 7 },
+      { row: 0, col: 3, type: "clue", clueRight: null, clueDown: 9 },
+      { row: 0, col: 4, type: "black" },
+      { row: 0, col: 5, type: "black" },
+      { row: 0, col: 6, type: "black" },
+      { row: 0, col: 7, type: "black" },
+      { row: 1, col: 0, type: "clue", clueRight: 6, clueDown: null },
+      { row: 1, col: 1, type: "white" },
+      { row: 1, col: 2, type: "white" },
+      { row: 1, col: 3, type: "white" },
+      { row: 1, col: 4, type: "black" },
+      { row: 1, col: 5, type: "black" },
+      { row: 1, col: 6, type: "black" },
+      { row: 1, col: 7, type: "black" },
+      { row: 2, col: 0, type: "clue", clueRight: 7, clueDown: null },
+      { row: 2, col: 1, type: "white" },
+      { row: 2, col: 2, type: "white" },
+      { row: 2, col: 3, type: "white" },
+      { row: 2, col: 4, type: "black" },
+      { row: 2, col: 5, type: "black" },
+      { row: 2, col: 6, type: "black" },
+      { row: 2, col: 7, type: "black" },
+      { row: 3, col: 0, type: "clue", clueRight: 9, clueDown: null },
+      { row: 3, col: 1, type: "white" },
+      { row: 3, col: 2, type: "white" },
+      { row: 3, col: 3, type: "white" },
+      { row: 3, col: 4, type: "black" },
+      { row: 3, col: 5, type: "black" },
+      { row: 3, col: 6, type: "black" },
+      { row: 3, col: 7, type: "black" },
+      { row: 4, col: 0, type: "black" },
+      { row: 4, col: 1, type: "black" },
+      { row: 4, col: 2, type: "black" },
+      { row: 4, col: 3, type: "black" },
+      { row: 4, col: 4, type: "black" },
+      { row: 4, col: 5, type: "black" },
+      { row: 4, col: 6, type: "black" },
+      { row: 4, col: 7, type: "black" },
+      { row: 5, col: 0, type: "black" },
+      { row: 5, col: 1, type: "black" },
+      { row: 5, col: 2, type: "black" },
+      { row: 5, col: 3, type: "black" },
+      { row: 5, col: 4, type: "black" },
+      { row: 5, col: 5, type: "black" },
+      { row: 5, col: 6, type: "black" },
+      { row: 5, col: 7, type: "black" },
+      { row: 6, col: 0, type: "black" },
+      { row: 6, col: 1, type: "black" },
+      { row: 6, col: 2, type: "black" },
+      { row: 6, col: 3, type: "black" },
+      { row: 6, col: 4, type: "black" },
+      { row: 6, col: 5, type: "black" },
+      { row: 6, col: 6, type: "black" },
+      { row: 6, col: 7, type: "black" },
+      { row: 7, col: 0, type: "black" },
+      { row: 7, col: 1, type: "black" },
+      { row: 7, col: 2, type: "black" },
+      { row: 7, col: 3, type: "black" },
+      { row: 7, col: 4, type: "black" },
+      { row: 7, col: 5, type: "black" },
+      { row: 7, col: 6, type: "black" },
+      { row: 7, col: 7, type: "black" },
+    ],
+  };
 }

@@ -35,5 +35,25 @@
     </div>
 
     <script src="js/clue-editor.js"></script>
+    <script>
+    function loadDebugPuzzle() {
+        const layout = buildDebugLayout();
+        sessionStorage.setItem('kakuro_grid', JSON.stringify(layout));
+        location.reload();
+    }
+
+    function buildDebugLayout() {
+        return [
+            ['black', 'clue', 'clue', 'clue', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+        ];
+    }
+    </script>
 </body>
 </html>

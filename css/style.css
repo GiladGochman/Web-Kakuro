@@ -341,3 +341,15 @@ body > * {
   margin: 20px 0;
   font-size: 0.95rem;
 }
+
+.success-box {
+  background: rgba(50, 180, 50, 0.25);
+  border: 1px solid #44cc44;
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: #aaffaa;
+  text-align: center;
+  margin: 20px 0;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
