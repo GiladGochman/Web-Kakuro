@@ -13,6 +13,7 @@ const statusArea = document.getElementById("status-area");
 
 let whiteBlocksRemaining = 0;
 let totalWhiteBlocks = 0;
+let solutionReceived = false;
 
 const puzzle = loadPuzzle();
 if (!puzzle) {
@@ -107,6 +108,7 @@ function processStreamEvent(line) {
     if (eventType === "assign") {
       updateCell(data.row, data.col, data.digit);
     } else if (eventType === "solved") {
+      solutionReceived = true;
       if (data.status === "unsolvable") {
         showError("No solution exists for this puzzle.");
       } else if (data.status === "solved") {
@@ -184,7 +186,7 @@ function updateCell(row, col, digit) {
     whiteBlocksRemaining--;
     updateWhiteBlockCounter();
 
-    if (whiteBlocksRemaining === 0) {
+    if (whiteBlocksRemaining === 0 && !solutionReceived) {
       checkVictoryCondition();
     }
   }
