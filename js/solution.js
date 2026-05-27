@@ -11,6 +11,9 @@ const gridEl = document.getElementById("grid");
 const actionsEl = document.getElementById("actions");
 const statusArea = document.getElementById("status-area");
 
+let whiteBlocksRemaining = 0;
+let totalWhiteBlocks = 0;
+
 const puzzle = loadPuzzle();
 if (!puzzle) {
   // Auto-load debug puzzle as default
@@ -22,6 +25,7 @@ if (!puzzle) {
 // Render the grid skeleton immediately (empty white cells, clue cells, black cells)
 renderGridSkeleton(puzzle);
 gridWrapper.hidden = false;
+displayWhiteBlockCounter();
 
 // Start solving and listening for real-time updates
 solvePuzzle(puzzle);
@@ -133,6 +137,10 @@ function renderGridSkeleton(puzzle) {
     cellMap[`${cell.row},${cell.col}`] = cell;
   }
 
+  // Count white blocks
+  totalWhiteBlocks = cells.filter(c => c.type === "white").length;
+  whiteBlocksRemaining = totalWhiteBlocks;
+
   for (let r = 0; r < rows; r++) {
     const tr = document.createElement("tr");
 
@@ -169,6 +177,13 @@ function updateCell(row, col, digit) {
     cell.classList.remove("cell--assigned");
     void cell.offsetWidth; // Trigger reflow to restart animation
     cell.classList.add("cell--assigned");
+
+    whiteBlocksRemaining--;
+    updateWhiteBlockCounter();
+
+    if (whiteBlocksRemaining === 0) {
+      checkVictoryCondition();
+    }
   }
 }
 
@@ -190,6 +205,79 @@ function buildClueDisplay(acrossSum, downSum) {
   wrapper.appendChild(acrossSpan);
   wrapper.appendChild(downSpan);
   return wrapper;
+}
+
+// ============================================================================
+// White block counter
+// ============================================================================
+
+function displayWhiteBlockCounter() {
+  const counterDiv = document.createElement("div");
+  counterDiv.id = "white-blocks-counter";
+  counterDiv.className = "white-blocks-counter";
+  counterDiv.innerHTML = `<strong>White Blocks:</strong> <span id="counter-value">${whiteBlocksRemaining}</span> / ${totalWhiteBlocks}`;
+  statusArea.insertBefore(counterDiv, statusArea.firstChild);
+}
+
+function updateWhiteBlockCounter() {
+  const counterValue = document.getElementById("counter-value");
+  if (counterValue) {
+    counterValue.textContent = whiteBlocksRemaining;
+  }
+}
+
+function checkVictoryCondition() {
+  const puzzle = loadPuzzle();
+  const { cells } = puzzle;
+
+  // Get all clue cells
+  const clueCells = cells.filter(c => c.type === "clue");
+
+  for (const clueCell of clueCells) {
+    if (clueCell.clueRight !== null) {
+      if (!validateClueRun(clueCell.row, clueCell.col, "right", clueCell.clueRight)) {
+        return;
+      }
+    }
+    if (clueCell.clueDown !== null) {
+      if (!validateClueRun(clueCell.row, clueCell.col, "down", clueCell.clueDown)) {
+        return;
+      }
+    }
+  }
+
+  showSuccess("✓ Puzzle solved successfully!");
+}
+
+function validateClueRun(startRow, startCol, direction, expectedSum) {
+  let row = startRow;
+  let col = startCol;
+  const digits = [];
+
+  if (direction === "right") {
+    col++;
+    while (col < 9) {
+      const cellEl = document.getElementById(`cell-${row}-${col}`);
+      if (!cellEl || cellEl.dataset.type !== "white") break;
+      const digit = parseInt(cellEl.textContent, 10);
+      if (isNaN(digit)) return false;
+      digits.push(digit);
+      col++;
+    }
+  } else {
+    row++;
+    while (row < 9) {
+      const cellEl = document.getElementById(`cell-${row}-${col}`);
+      if (!cellEl || cellEl.dataset.type !== "white") break;
+      const digit = parseInt(cellEl.textContent, 10);
+      if (isNaN(digit)) return false;
+      digits.push(digit);
+      row++;
+    }
+  }
+
+  const sum = digits.reduce((a, b) => a + b, 0);
+  return sum === expectedSum && new Set(digits).size === digits.length;
 }
 
 // ============================================================================
