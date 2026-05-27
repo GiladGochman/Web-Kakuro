@@ -43,28 +43,46 @@
 
     <script src="js/grid-editor.js"></script>
     <script>
-    function loadDebugPuzzle() {
-        const layout = buildDebugLayout();
+    function loadDebugPuzzle(puzzleNum = 1) {
+        const layout = puzzleNum === 2 ? buildDebugLayout2() : buildDebugLayout();
         sessionStorage.setItem('kakuro_grid', JSON.stringify(layout));
         window.location.href = 'clues.php';
     }
 
     function buildDebugLayout() {
         return [
-            ['black', 'clue', 'clue', 'clue', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
-            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'clue', 'clue', 'clue', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+        ];
+    }
+
+    function buildDebugLayout2() {
+        return [
+            ['black', 'clue', 'clue', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
         ];
     }
     </script>
-    <div style="position:fixed;bottom:12px;right:12px">
-        <button onclick="loadDebugPuzzle()" style="background:#c84;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem">
-            Debug: solve 8×8 puzzle
+    <div style="position:fixed;bottom:12px;right:12px;display:flex;gap:6px;flex-direction:column">
+        <button onclick="loadDebugPuzzle(1)" style="background:#c84;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem">
+            Debug: puzzle 1
+        </button>
+        <button onclick="loadDebugPuzzle(2)" style="background:#c84;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.8rem">
+            Debug: puzzle 2
         </button>
     </div>
 </body>

@@ -110,6 +110,9 @@ function processStreamEvent(line) {
       if (data.status === "unsolvable") {
         showError("No solution exists for this puzzle.");
       } else if (data.status === "solved") {
+        if (data.solution) {
+          fillRemainingCells(data.solution);
+        }
         showSuccess("Puzzle solved! ✓");
       } else {
         showError(data.message || "An error occurred.");
@@ -278,6 +281,25 @@ function validateClueRun(startRow, startCol, direction, expectedSum) {
 
   const sum = digits.reduce((a, b) => a + b, 0);
   return sum === expectedSum && new Set(digits).size === digits.length;
+}
+
+// ============================================================================
+// Fill remaining cells from solution
+// ============================================================================
+
+function fillRemainingCells(solutionGrid) {
+  for (let row = 0; row < solutionGrid.length; row++) {
+    for (let col = 0; col < solutionGrid[row].length; col++) {
+      const digit = solutionGrid[row][col];
+      if (digit !== null) {
+        const cell = document.getElementById(`cell-${row}-${col}`);
+        if (cell && !cell.textContent) {
+          cell.textContent = digit;
+          cell.classList.add("cell--assigned");
+        }
+      }
+    }
+  }
 }
 
 // ============================================================================
