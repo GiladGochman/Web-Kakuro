@@ -181,15 +181,134 @@ function buildDebugLayout() {
   ];
 }
 
+function buildDebugLayout2() {
+  return [
+    [
+      "black",
+      "clue",
+      "clue",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "clue",
+      "white",
+      "white",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "clue",
+      "white",
+      "white",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+    [
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+    ],
+  ];
+}
+
 function autoFillDebugClues() {
-  const clues = {
-    "0_1": { across: 0, down: 6 },
-    "0_2": { across: 0, down: 7 },
-    "0_3": { across: 0, down: 9 },
-    "1_0": { across: 6, down: 0 },
-    "2_0": { across: 7, down: 0 },
-    "3_0": { across: 9, down: 0 },
-  };
+  const layout = loadLayout();
+  let clues;
+
+  // Detect which puzzle layout is loaded and use matching clues
+  if (layout && layout.length === 9 && layout[0].length === 9) {
+    // Puzzle 2 (9x9)
+    clues = {
+      "0_1": { across: 0, down: 6 },
+      "0_2": { across: 0, down: 7 },
+      "1_0": { across: 6, down: 0 },
+      "2_0": { across: 7, down: 0 },
+    };
+  } else {
+    // Puzzle 1 (8x8)
+    clues = {
+      "0_1": { across: 0, down: 6 },
+      "0_2": { across: 0, down: 7 },
+      "0_3": { across: 0, down: 9 },
+      "1_0": { across: 6, down: 0 },
+      "2_0": { across: 7, down: 0 },
+      "3_0": { across: 9, down: 0 },
+    };
+  }
 
   for (const [key, values] of Object.entries(clues)) {
     const acrossInput = document.getElementById(`across_${key}`);

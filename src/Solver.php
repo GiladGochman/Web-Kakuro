@@ -64,11 +64,15 @@ class Solver
 
     private function solveBoard(Board $board): ?Board
     {
+        $this->log("=== solveBoard() called ===");
+
         if (!$this->propagate($board)) {
+            $this->log("CONTRADICTION: propagation failed");
             return null; // Contradiction found during propagation.
         }
 
         if ($board->isComplete()) {
+            $this->log("✓ SOLVED! Board is complete");
             return $board;
         }
 
@@ -76,20 +80,27 @@ class Solver
         [$row, $col] = $this->pickMRVCell($board);
         $candidates  = $board->getCandidates($row, $col);
 
+        $this->log("BACKTRACKING: trying cell ($row,$col) with candidates: " . implode(',', $candidates));
+
         foreach ($candidates as $digit) {
+            $this->log("  └─ GUESS: ($row,$col) = $digit");
             $snapshot = $board->snapshot();
             $this->assignCell($snapshot, $row, $col, $digit);
 
             if (!$this->removeDigitFromPeers($snapshot, $row, $col, $digit)) {
+                $this->log("    └─ GUESS REJECTED: immediate peer conflict");
                 continue; // Immediate contradiction — try next digit.
             }
 
+            $this->log("    └─ GUESS ACCEPTED: recursing...");
             $result = $this->solveBoard($snapshot);
             if ($result !== null) {
                 return $result;
             }
+            $this->log("    └─ GUESS FAILED: recursion returned null");
         }
 
+        $this->log("DEAD END: all guesses failed");
         return null; // All guesses led to contradictions.
     }
 
@@ -103,16 +114,36 @@ class Solver
      */
     private function propagate(Board $board): bool
     {
+        $this->log("  propagate() START");
+        $iteration = 0;
+
         do {
             $changed = false;
+            $iteration++;
+            $this->log("  ┌─ PROPAGATION PASS $iteration");
 
-            if (!$this->applyCombinationElimination($board, $changed)) return false;
-            if (!$this->applyNakedSingles($board, $changed))           return false;
-            if (!$this->applyHiddenSingles($board, $changed))          return false;
-            if (!$this->applyNakedPairsTriples($board, $changed))      return false;
+            if (!$this->applyCombinationElimination($board, $changed)) {
+                $this->log("  │  └─ FAILED: Combination elimination");
+                return false;
+            }
+            if (!$this->applyNakedSingles($board, $changed)) {
+                $this->log("  │  └─ FAILED: Naked singles");
+                return false;
+            }
+            if (!$this->applyHiddenSingles($board, $changed)) {
+                $this->log("  │  └─ FAILED: Hidden singles");
+                return false;
+            }
+            if (!$this->applyNakedPairsTriples($board, $changed)) {
+                $this->log("  │  └─ FAILED: Naked pairs/triples");
+                return false;
+            }
+
+            $this->log("  └─ PASS $iteration DONE, changed=$changed");
 
         } while ($changed);
 
+        $this->log("  propagate() END (fixed point reached)");
         return true;
     }
 
@@ -126,18 +157,24 @@ class Solver
      */
     private function applyNakedSingles(Board $board, bool &$changed): bool
     {
+        $count = 0;
         foreach ($board->getUnassignedCells() as [$row, $col]) {
             if ($board->candidateCount($row, $col) !== 1) {
                 continue;
             }
 
             $digit = $board->getCandidates($row, $col)[0];
+            $count++;
+            $this->log("    │  NAKED SINGLE: ($row,$col) must be $digit");
             $this->assignCell($board, $row, $col, $digit);
             $changed = true;
 
             if (!$this->removeDigitFromPeers($board, $row, $col, $digit)) {
                 return false;
             }
+        }
+        if ($count > 0) {
+            $this->log("    │  Applied $count naked singles");
         }
 
         return true;
@@ -152,6 +189,7 @@ class Solver
      */
     private function applyHiddenSingles(Board $board, bool &$changed): bool
     {
+        $count = 0;
         foreach ($board->getRuns() as $run) {
             foreach (range(1, 9) as $digit) {
                 $possibleCells = [];
@@ -181,6 +219,8 @@ class Solver
                     // simply not use it at all.
                     if (!$this->runRequiresDigit($run, $digit)) continue;
 
+                    $count++;
+                    $this->log("    │  HIDDEN SINGLE: digit $digit must go to ($row,$col)");
                     $this->assignCell($board, $row, $col, $digit);
                     $changed = true;
 
@@ -189,6 +229,9 @@ class Solver
                     }
                 }
             }
+        }
+        if ($count > 0) {
+            $this->log("    │  Applied $count hidden singles");
         }
 
         return true;
@@ -239,6 +282,9 @@ class Solver
 
                     // Found a naked group — remove these digits from all other cells in the run.
                     $groupCoords = array_map(fn($c) => "{$c['row']},{$c['col']}", $group);
+                    $groupStr = implode(';', $groupCoords);
+                    $digitsStr = implode(',', array_keys($unionDigits));
+                    $this->log("    │  NAKED " . ($groupSize === 2 ? 'PAIR' : 'TRIPLE') . ": cells [$groupStr] lock digits [$digitsStr]");
 
                     foreach ($unassigned as $coord) {
                         ['row' => $r, 'col' => $c] = $coord;
@@ -246,6 +292,7 @@ class Solver
 
                         foreach (array_keys($unionDigits) as $digit) {
                             if ($board->removeCandidate($r, $c, $digit)) {
+                                $this->log("      └─ Removed $digit from ($r,$c)");
                                 $changed = true;
                             }
                             if ($board->candidateCount($r, $c) === 0) {
@@ -284,6 +331,9 @@ class Solver
      */
     private function applyCombinationElimination(Board $board, bool &$changed): bool
     {
+        $combosRemoved = 0;
+        $candidatesRemoved = 0;
+
         foreach ($board->getRuns() as $run) {
             // Step A: collect each cell's effective candidates (assigned = single value).
             $cellCandidates = [];
@@ -294,7 +344,14 @@ class Solver
             }
 
             // Step B: prune combos that can't fill any cell.
+            $before = count($run->getCombinations());
             $run->pruneByAllCellCandidates($cellCandidates);
+            $after = count($run->getCombinations());
+            if ($before > $after) {
+                $removed = $before - $after;
+                $combosRemoved += $removed;
+                $this->log("    │  COMBO ELIM: removed $removed combos (was $before, now $after)");
+            }
 
             if ($run->hasNoCombinations()) {
                 return false;
@@ -310,6 +367,8 @@ class Solver
                 foreach ($board->getCandidates($r, $c) as $digit) {
                     if (!in_array($digit, $supported, true)) {
                         $board->removeCandidate($r, $c, $digit);
+                        $candidatesRemoved++;
+                        $this->log("      └─ Removed unsupported digit $digit from ($r,$c)");
                         $changed = true;
                     }
                 }
@@ -318,6 +377,10 @@ class Solver
                     return false;
                 }
             }
+        }
+
+        if ($combosRemoved > 0 || $candidatesRemoved > 0) {
+            $this->log("    │  Applied combination elimination: $combosRemoved combos, $candidatesRemoved candidates removed");
         }
 
         return true;
@@ -338,18 +401,25 @@ class Solver
             $board->getVerticalRun($row, $col),
         ]);
 
+        $removed = 0;
         foreach ($runs as $run) {
             foreach ($run->getCells() as $coord) {
                 ['row' => $r, 'col' => $c] = $coord;
                 if ($r === $row && $c === $col) continue;
                 if ($board->getAssigned($r, $c) !== null) continue;
 
-                $board->removeCandidate($r, $c, $digit);
+                if ($board->removeCandidate($r, $c, $digit)) {
+                    $removed++;
+                }
 
                 if ($board->candidateCount($r, $c) === 0) {
                     return false;
                 }
             }
+        }
+
+        if ($removed > 0) {
+            $this->log("      └─ Peer removal: removed $digit from $removed peer cells");
         }
 
         return true;
@@ -382,6 +452,16 @@ class Solver
             }
         }
 
+        $this->log("MRV: selected cell ($bestRow,$bestCol) with $bestCount candidates");
         return [$bestRow, $bestCol];
+    }
+
+    // -------------------------------------------------------------------------
+    // Logging helper
+    // -------------------------------------------------------------------------
+
+    private function log(string $message): void
+    {
+        error_log($message);
     }
 }

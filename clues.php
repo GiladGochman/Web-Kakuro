@@ -54,6 +54,20 @@
             ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
         ];
     }
+
+    function buildDebugLayout2() {
+        return [
+            ['black', 'clue', 'clue', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['clue',  'white', 'white', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+            ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
+        ];
+    }
     </script>
 </body>
 </html>

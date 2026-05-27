@@ -54,7 +54,7 @@ class Run
 
     /**
      * Removes combos that cannot fill the run given each cell's current candidates.
-     * A combo is valid if there exists a bijection between combo digits and cells
+     * A combo is valid if there exists an assignment of combo digits to cells
      * such that each cell's assigned digit is in its candidates.
      * $cellCandidates is indexed by position (same order as $this->cells).
      */
@@ -63,7 +63,6 @@ class Run
         $this->combinations = array_values(array_filter(
             $this->combinations,
             function (array $combo) use ($cellCandidates): bool {
-                // Check if combo digits can be assigned to cells in some order
                 return $this->canAssignCombo($combo, $cellCandidates);
             }
         ));
@@ -71,7 +70,7 @@ class Run
 
     /**
      * Check if combo digits can be assigned to cells in some permutation.
-     * This handles the fact that combos are unordered sets.
+     * This uses a backtracking matching algorithm to handle unordered combos correctly.
      */
     private function canAssignCombo(array $combo, array $cellCandidates): bool
     {
@@ -80,12 +79,11 @@ class Run
             return false;
         }
 
-        // Try all permutations of the combo to see if any matches the cell candidates
         return $this->tryAssignPermutation($combo, $cellCandidates, 0, array_flip(range(0, $numCells - 1)));
     }
 
     /**
-     * Recursively try to assign combo digits to cells.
+     * Recursively try to assign combo digits to cells using backtracking.
      * $usedPositions tracks which cell positions have been assigned.
      */
     private function tryAssignPermutation(array $combo, array $cellCandidates, int $comboIdx, array $usedPositions): bool
@@ -96,7 +94,6 @@ class Run
 
         $digit = $combo[$comboIdx];
 
-        // Try assigning this digit to any unassigned cell that can accept it
         foreach ($usedPositions as $pos => $_) {
             if (in_array($digit, $cellCandidates[$pos], true)) {
                 unset($usedPositions[$pos]);
