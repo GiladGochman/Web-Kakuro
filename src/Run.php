@@ -35,6 +35,11 @@ class Run
         return $this->combinations;
     }
 
+    public function __clone(): void
+    {
+        $this->combinations = array_values(array_filter($this->combinations));
+    }
+
     /**
      * Returns the union of all digits that appear in at least one valid combination.
      * Used to derive candidate sets for cells.
