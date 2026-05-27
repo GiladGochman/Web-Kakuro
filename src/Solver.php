@@ -192,6 +192,19 @@ class Solver
         $count = 0;
         foreach ($board->getRuns() as $run) {
             foreach (range(1, 9) as $digit) {
+                $digitAlreadyAssignedInRun = false;
+                foreach ($run->getCells() as $coord) {
+                    ['row' => $r, 'col' => $c] = $coord;
+                    if ($board->getAssigned($r, $c) === $digit) {
+                        $digitAlreadyAssignedInRun = true;
+                        break;
+                    }
+                }
+                if ($digitAlreadyAssignedInRun) {
+                    // The run already contains this digit, so it is not missing.
+                    continue;
+                }
+
                 $possibleCells = [];
 
                 foreach ($run->getCells() as $coord) {
