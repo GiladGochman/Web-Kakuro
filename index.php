@@ -44,15 +44,13 @@
     <script src="js/grid-editor.js"></script>
     <script>
     function loadDebugPuzzle() {
-        const puzzle = buildDebugPuzzle();
-        sessionStorage.setItem('kakuro_puzzle', JSON.stringify(puzzle));
-        window.location.href = 'solution.php';
+        const layout = buildDebugLayout();
+        sessionStorage.setItem('kakuro_grid', JSON.stringify(layout));
+        window.location.href = 'clues.php';
     }
 
-    function buildDebugPuzzle() {
-        const rows = 8;
-        const cols = 8;
-        const layout = [
+    function buildDebugLayout() {
+        return [
             ['black', 'clue', 'clue', 'clue', 'black', 'black', 'black', 'black'],
             ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
             ['clue',  'white', 'white', 'white', 'black', 'black', 'black', 'black'],
@@ -62,38 +60,6 @@
             ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
             ['black', 'black', 'black', 'black', 'black', 'black', 'black', 'black'],
         ];
-
-        const clues = {
-            '0,1': { clueRight: null, clueDown: 6 },
-            '0,2': { clueRight: null, clueDown: 6 },
-            '0,3': { clueRight: null, clueDown: 6 },
-            '1,0': { clueRight: 6, clueDown: null },
-            '2,0': { clueRight: 6, clueDown: null },
-            ['black', 'clue', 'clue', 'clue', 'clue', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-            ['clue',  'white', 'white', 'white', 'white', 'black', 'black', 'black'],
-        };
-
-        const cells = [];
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const type = layout[row][col];
-            '0,1': { clueRight: null, clueDown: 10 },
-            '0,2': { clueRight: null, clueDown: 10 },
-            '0,3': { clueRight: null, clueDown: 10 },
-            '0,4': { clueRight: null, clueDown: 10 },
-            '1,0': { clueRight: 10, clueDown: null },
-            '2,0': { clueRight: 10, clueDown: null },
-            '3,0': { clueRight: 10, clueDown: null },
-            '4,0': { clueRight: 10, clueDown: null },
-                    cells.push({ row, col, type });
-                }
-            }
-        }
-
-        return { rows, cols, cells };
     }
     </script>
     <div style="position:fixed;bottom:12px;right:12px">

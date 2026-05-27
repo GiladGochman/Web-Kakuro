@@ -19,10 +19,21 @@ require_once __DIR__ . '/Board.php';
 class Solver
 {
     private Board $board;
+    /** @var callable|null Callback fired when a cell is assigned: fn(int $row, int $col, int $digit) */
+    private $onAssign = null;
 
     public function __construct(Board $board)
     {
         $this->board = $board;
+    }
+
+    /**
+     * Sets a callback to be invoked each time a cell is assigned during solving.
+     * Callback signature: fn(int $row, int $col, int $digit): void
+     */
+    public function setOnAssignCallback(callable $cb): void
+    {
+        $this->onAssign = $cb;
     }
 
     /**
@@ -32,6 +43,19 @@ class Solver
     public function solve(): ?Board
     {
         return $this->solveBoard($this->board);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /** Assigns a cell and fires the callback if set. */
+    private function assignCell(Board $board, int $row, int $col, int $digit): void
+    {
+        $board->assign($row, $col, $digit);
+        if ($this->onAssign) {
+            ($this->onAssign)($row, $col, $digit);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -54,7 +78,7 @@ class Solver
 
         foreach ($candidates as $digit) {
             $snapshot = $board->snapshot();
-            $snapshot->assign($row, $col, $digit);
+            $this->assignCell($snapshot, $row, $col, $digit);
 
             if (!$this->removeDigitFromPeers($snapshot, $row, $col, $digit)) {
                 continue; // Immediate contradiction — try next digit.
@@ -108,7 +132,7 @@ class Solver
             }
 
             $digit = $board->getCandidates($row, $col)[0];
-            $board->assign($row, $col, $digit);
+            $this->assignCell($board, $row, $col, $digit);
             $changed = true;
 
             if (!$this->removeDigitFromPeers($board, $row, $col, $digit)) {
@@ -157,7 +181,7 @@ class Solver
                     // simply not use it at all.
                     if (!$this->runRequiresDigit($run, $digit)) continue;
 
-                    $board->assign($row, $col, $digit);
+                    $this->assignCell($board, $row, $col, $digit);
                     $changed = true;
 
                     if (!$this->removeDigitFromPeers($board, $row, $col, $digit)) {

@@ -1,16 +1,14 @@
 <?php
 
 /**
- * Kakuro solver API endpoint.
+ * Kakuro solver API endpoint — streams real-time updates.
  *
- * Accepts a POST request with a JSON body describing the puzzle, runs the
- * solver, and returns a JSON response.
+ * Uses Server-Sent Events (SSE) to emit each cell assignment as it happens,
+ * allowing the frontend to render the solution in real-time.
  *
- * Request body shape: see Board::fromJson() in src/Board.php
- * Response shape:
- *   { "status": "solved",      "solution": [[int|null, ...], ...] }
- *   { "status": "unsolvable",  "message": "..." }
- *   { "status": "error",       "message": "..." }
+ * Events:
+ *   "assign" { "row": int, "col": int, "digit": int }
+ *   "solved" or "error" { "message": string }
  */
 
 require_once __DIR__ . '/src/CombinationTable.php';
@@ -18,11 +16,16 @@ require_once __DIR__ . '/src/Run.php';
 require_once __DIR__ . '/src/Board.php';
 require_once __DIR__ . '/src/Solver.php';
 
-header('Content-Type: application/json');
+// Set headers for Server-Sent Events
+header('Content-Type: text/event-stream');
+header('Cache-Control: no-cache');
+header('Connection: keep-alive');
+header('X-Accel-Buffering: no'); // Disable nginx buffering
+flush();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed.']);
+    sendEvent('error', ['message' => 'Method not allowed.']);
     exit;
 }
 
@@ -31,7 +34,7 @@ $data = json_decode($body, associative: true);
 
 if ($data === null) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON body.']);
+    sendEvent('error', ['message' => 'Invalid JSON body.']);
     exit;
 }
 
@@ -39,17 +42,36 @@ try {
     $combTable = new CombinationTable();
     $board     = Board::fromJson($data, $combTable);
     $solver    = new Solver($board);
-    $result    = $solver->solve();
+
+    // Set callback to emit events on each cell assignment
+    $solver->setOnAssignCallback(function(int $row, int $col, int $digit) {
+        sendEvent('assign', compact('row', 'col', 'digit'));
+    });
+
+    $result = $solver->solve();
 
     if ($result === null) {
-        echo json_encode(['status' => 'unsolvable', 'message' => 'No solution exists for this puzzle.']);
+        sendEvent('solved', ['status' => 'unsolvable', 'solution' => null]);
     } else {
-        echo json_encode(['status' => 'solved', 'solution' => $result->toSolutionGrid()]);
+        sendEvent('solved', ['status' => 'solved', 'solution' => $result->toSolutionGrid()]);
     }
 } catch (InvalidArgumentException $e) {
     http_response_code(422);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    sendEvent('error', ['message' => $e->getMessage()]);
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Internal server error: ' . $e->getMessage()]);
+    sendEvent('error', ['message' => 'Internal server error: ' . $e->getMessage()]);
+}
+
+// ============================================================================
+
+/**
+ * Sends an SSE event with the given type and data.
+ */
+function sendEvent(string $event, array $data): void
+{
+    echo "event: $event\n";
+    echo 'data: ' . json_encode($data) . "\n\n";
+    flush();
+    ob_flush();
 }
